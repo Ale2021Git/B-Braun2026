@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#00A97A">
+    
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="B.Braun Escala">
     
     <title>B.Braun Escala Pro</title>
     
@@ -163,9 +166,13 @@
 </div>
 
 <script>
-    // Registro Simples do Service Worker para PWA
+    // Único registro do Service Worker
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('SW registrado!', reg))
+            .catch(err => console.log('Erro no SW:', err));
+        });
     }
 
     const dataRef = new Date(2026, 0, 18); 
@@ -188,8 +195,6 @@
     }
 
     function obterFeriados(ano) {
-        // Cálculo simplificado de feriados
-        const fmt = (m, d) => `${m}-${d}`;
         return {
             "0-1": "Ano Novo", "3-21": "Tiradentes", "4-1": "Dia do Trabalho", "8-7": "Independência", 
             "9-12": "Nsa Sra Aparecida", "10-2": "Finados", "10-15": "Proclamação República", 
@@ -240,7 +245,6 @@
             
             html += `<div class="grid"><div class="dia-label">W</div>${['S','T','Q','Q','S','S','D'].map(d => `<div class="dia-label">${d}</div>`).join('')}`;
 
-            // Primeira linha com semana
             html += `<div class="semana-num">${getWeekISO(primDay)}</div>`;
             for(let i=0; i<espacos; i++) html += `<div></div>`;
 
@@ -248,7 +252,6 @@
                 let atual = new Date(ano, m, d);
                 let iso = `${ano}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 
-                // Quebra de linha para nova semana
                 if (atual.getDay() === 1 && d !== 1) { 
                     html += `<div class="semana-num">${getWeekISO(atual)}</div>`; 
                 }
