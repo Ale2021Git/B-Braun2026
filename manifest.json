@@ -1,0 +1,20 @@
+{
+  "short_name": "Escala Pro",
+  "name": "B.Braun Escala Pro",
+  "icons": [
+    {
+      "src": "https://i.imgur.com/WvMInJv.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.imgur.com/WvMInJv.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#00A97A",
+  "background_color": "#0A0A0A"
+}

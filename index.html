@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#00A97A">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>B.Braun Escala Pro</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="https://i.imgur.com/WvMInJv.png">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/WvMInJv.png">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap');
+        
+        :root {
+            --primary: #00A97A; --bg: #F4F7F6; --card: #FFFFFF; --text: #1A1A1A;
+            --accent: #A800C4; --amarelo: #FFD54F; --verde-escala: #81C784; --border: #E0E0E0;
+            --danger: #ff5252;
+        }
+
+        .dark-mode {
+            --bg: #0A0A0A; --card: #141414; --text: #F5F5F5; --border: #262626;
+            --amarelo: #FBC02D; --verde-escala: #2E7D32;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: 0.3s; overflow-x: hidden; scroll-behavior: smooth; }
+
+        header { 
+            background: var(--primary); padding: 15px 20px; color: white; display: flex; 
+            justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .logo-main { font-weight: 800; font-size: 1.2em; letter-spacing: -1px; cursor: pointer; }
+        
+        .container { padding: 15px; max-width: 600px; margin: auto; }
+        
+        .status-panel {
+            background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; 
+            border: 1px solid var(--border); text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .clock-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.2em; font-weight: 700; color: var(--primary); margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .status-row { display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding-top: 15px; }
+        .status-label { font-size: 0.65em; opacity: 0.6; font-weight: 800; text-transform: uppercase; }
+        .status-val { font-size: 1.1em; font-weight: 800; color: var(--primary); margin-top: 4px; }
+        
+        .mes-card { background: var(--card); border-radius: 24px; padding: 15px; margin-bottom: 25px; border: 1px solid var(--border); }
+        .mes-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; cursor: pointer; margin-bottom: 10px; }
+        .mes-titulo { font-weight: 800; font-size: 1.1em; text-transform: capitalize; color: var(--primary); }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: 35px repeat(7, 1fr); 
+            gap: 4px; 
+            align-items: center;
+        }
+
+        .dia-label { font-size: 0.65em; font-weight: 800; text-align: center; color: var(--primary); opacity: 0.5; padding-bottom: 8px; }
+        
+        .semana-num { 
+            font-size: 0.7em; font-weight: 800; color: var(--accent); 
+            display: flex; align-items: center; justify-content: center;
+            height: 100%; border-right: 1px solid var(--border);
+            margin-right: 2px;
+        }
+
+        .dia { aspect-ratio: 1/1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; border-radius: 8px; font-weight: 800; cursor: pointer; border: 2px solid transparent; position: relative; overflow: hidden; padding: 4px 1px; box-sizing: border-box; }
+        .dia-num { font-size: 0.9em; }
+        
+        .AMARELO { background: var(--amarelo); color: #000; }
+        .VERDE { background: var(--verde-escala); color: #fff; }
+        .trabalho-border { border-color: var(--text) !important; }
+        .hoje { box-shadow: 0 0 0 3px var(--accent); z-index: 2; border: 2px solid var(--accent) !important; }
+        
+        .nota-txt { font-size: 0.4em; text-transform: uppercase; font-weight: 900; line-height: 1.1; text-align: center; width: 100%; background: rgba(0,0,0,0.15); padding: 1px 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        
+        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-prim { background: var(--primary); color: white; }
+        .btn-danger { background: none; color: var(--danger); font-size: 0.75em; margin-top: 20px; border: 1px solid var(--danger); opacity: 0.6; }
+
+        .footer-dev { padding: 30px 20px; margin-top: 10px; border-top: 1px solid var(--border); text-align: center; opacity: 0.5; }
+        .dev-name { font-size: 0.6em; font-weight: 800; display: block; letter-spacing: 1px; }
+        
+        .nota-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 3000; backdrop-filter: blur(5px); }
+        .nota-overlay.active { display: flex; }
+        .nota-panel { background: var(--card); width: 85%; max-width: 320px; padding: 25px; border-radius: 20px; border: 2px solid var(--primary); }
+
+        .feriados-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(2px); }
+        .feriados-overlay.active { opacity: 1; visibility: visible; }
+        .feriados-panel { position: fixed; top: 0; right: -100%; width: 85%; height: 100%; background: var(--card); z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 30px 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); overflow-y: auto; box-sizing: border-box; }
+        .feriados-panel.active { right: 0; }
+        
+        .evento-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; }
+        .evento-data { background: var(--primary); color: white; padding: 6px; border-radius: 6px; min-width: 38px; text-align: center; font-weight: 800; font-size: 0.8em; }
+        .tag-status { font-size: 0.6em; font-weight: 900; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; margin-top: 3px; display: inline-block; }
+        .tag-trabalho { background: rgba(255, 82, 82, 0.15); color: var(--danger); }
+        .tag-folga { background: rgba(0, 169, 122, 0.15); color: var(--primary); }
+    </style>
+</head>
+<body class="dark-mode">
+
+<header>
+    <div onclick="location.reload()" class="logo-main">B|BRAUN</div>
+    <div id="txt-hora" style="font-family: 'JetBrains Mono'; font-weight: 700; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 8px; cursor: pointer;" onclick="toggleTheme()">--:--</div>
+</header>
+
+<div class="container">
+    <div class="status-panel">
+        <div id="big-clock" class="clock-display">00:00:00</div>
+        <div class="status-row">
+            <div class="status-item"><div class="status-label">Hoje</div><div id="resumo-hoje" class="status-val">-</div></div>
+            <div class="status-item"><div class="status-label">Mudança em</div><div id="resumo-prox" class="status-val">-</div></div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+        <select id="anoSelect" onchange="gerarCalendario()" style="background: var(--card); color: var(--text); border: 1px solid var(--border); padding: 10px; border-radius: 12px; font-weight: 700;">
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+        </select>
+        <select id="turmaSelect" onchange="salvarConfig()" style="background: var(--card); color: var(--text); border: 1px solid var(--border); padding: 10px; border-radius: 12px; font-weight: 700; flex-grow: 1;">
+            <option value="AC">TURMA A/C (AMARELO)</option>
+            <option value="BD">TURMA B/D (VERDE)</option>
+        </select>
+    </div>
+
+    <div id="calendario-box"></div>
+    <button class="btn btn-danger" onclick="resetarDados()">LIMPAR TODAS AS NOTAS</button>
+</div>
+
+<footer class="footer-dev">
+    <span class="dev-name">DEVELOPED BY ALEXANDRE A LACERDA</span>
+    <div style="font-size: 0.5em; margin-top: 5px; opacity: 0.7;">ALELACERD@GMAIL.COM</div>
+</footer>
+
+<div id="notaOverlay" class="nota-overlay" onclick="fecharNota()">
+    <div class="nota-panel" onclick="event.stopPropagation()">
+        <h3 id="notaDataTit" style="margin: 0; color: var(--primary); text-align: center;">00/00</h3>
+        <input type="text" id="notaInput" style="width:100%; padding:14px; margin:15px 0; border-radius:12px; border:1px solid var(--border); background:var(--bg); color:var(--text); text-align:center; font-weight:700; box-sizing: border-box;" placeholder="Escreva aqui..." maxlength="12">
+        <button class="btn btn-prim" onclick="salvarNota()">SALVAR</button>
+    </div>
+</div>
+
+<div id="feriadosOverlay" class="feriados-overlay" onclick="closeFeriados()"></div>
+<div id="feriadosPanel" class="feriados-panel">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 id="feriadoTitulo" style="margin: 0; color: var(--primary); font-size: 1.2em;">Eventos</h2>
+        <button onclick="closeFeriados()" style="background:none; border:none; font-size:2em; color:var(--text); cursor:pointer;">&times;</button>
+    </div>
+    <div id="listaEventos"></div>
+</div>
+
+<script>
+    // Registro Simples do Service Worker para PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
+    const dataRef = new Date(2026, 0, 18); 
+    let dataSelecionada = "";
+
+    function getWeekISO(date) {
+        const d = new Date(date.getTime());
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+        const yearStart = new Date(d.getFullYear(), 0, 1);
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function checkTrabalha(data, turma) {
+        const d1 = new Date(data.getFullYear(), data.getMonth(), data.getDate());
+        const dRef = new Date(dataRef.getFullYear(), dataRef.getMonth(), dataRef.getDate());
+        const diff = Math.floor((d1 - dRef) / 86400000);
+        const isAmarelo = (((diff % 4) + 4) % 4) < 2;
+        return (turma === "AC" && isAmarelo) || (turma === "BD" && !isAmarelo);
+    }
+
+    function obterFeriados(ano) {
+        // Cálculo simplificado de feriados
+        const fmt = (m, d) => `${m}-${d}`;
+        return {
+            "0-1": "Ano Novo", "3-21": "Tiradentes", "4-1": "Dia do Trabalho", "8-7": "Independência", 
+            "9-12": "Nsa Sra Aparecida", "10-2": "Finados", "10-15": "Proclamação República", 
+            "10-20": "Consciência Negra", "11-25": "Natal", "3-23": "São Jorge", "8-22": "Aniversário SG"
+        };
+    }
+
+    function atualizarRelogio() {
+        const agora = new Date();
+        const display = agora.toLocaleTimeString('pt-BR');
+        document.getElementById('big-clock').innerText = display;
+        document.getElementById('txt-hora').innerText = display.substring(0, 5);
+        
+        const turma = document.getElementById('turmaSelect').value;
+        const hj = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+        const trabalha = checkTrabalha(hj, turma);
+        
+        const elResumo = document.getElementById('resumo-hoje');
+        elResumo.innerText = trabalha ? "TRABALHO" : "FOLGA";
+        elResumo.style.color = trabalha ? "var(--primary)" : "var(--accent)";
+
+        let dProx = 1;
+        while(checkTrabalha(new Date(hj.getTime() + (dProx * 86400000)), turma) === trabalha) dProx++;
+        document.getElementById('resumo-prox').innerText = `${dProx} dia${dProx>1?'s':''}`;
+    }
+
+    function gerarCalendario() {
+        const ano = parseInt(document.getElementById('anoSelect').value);
+        const turma = document.getElementById('turmaSelect').value;
+        const logs = JSON.parse(localStorage.getItem('logs_pro_v1') || '{}');
+        const container = document.getElementById('calendario-box');
+        const hojeStr = new Date().toLocaleDateString('en-CA');
+        
+        container.innerHTML = "";
+
+        for (let m = 0; m < 12; m++) {
+            let primDay = new Date(ano, m, 1);
+            let diasMes = new Date(ano, m + 1, 0).getDate();
+            let espacos = (primDay.getDay() === 0) ? 6 : primDay.getDay() - 1;
+            
+            let card = document.createElement('div');
+            card.className = 'mes-card';
+            
+            let html = `<div class="mes-header" onclick="abrirPainelEventos(${m})">
+                            <span class="mes-titulo">${new Intl.DateTimeFormat('pt-BR', {month:'long'}).format(primDay)}</span>
+                            <span style="font-size: 0.6em; font-weight: 800; border: 1.5px solid; padding: 2px 8px; border-radius: 6px;">VER</span>
+                        </div>`;
+            
+            html += `<div class="grid"><div class="dia-label">W</div>${['S','T','Q','Q','S','S','D'].map(d => `<div class="dia-label">${d}</div>`).join('')}`;
+
+            // Primeira linha com semana
+            html += `<div class="semana-num">${getWeekISO(primDay)}</div>`;
+            for(let i=0; i<espacos; i++) html += `<div></div>`;
+
+            for(let d=1; d<=diasMes; d++) {
+                let atual = new Date(ano, m, d);
+                let iso = `${ano}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                
+                // Quebra de linha para nova semana
+                if (atual.getDay() === 1 && d !== 1) { 
+                    html += `<div class="semana-num">${getWeekISO(atual)}</div>`; 
+                }
+
+                const trabalha = checkTrabalha(atual, turma);
+                const isAmarelo = (((Math.floor((new Date(ano, m, d) - new Date(2026, 0, 18)) / 86400000) % 4) + 4) % 4) < 2;
+                
+                html += `<div class="dia ${isAmarelo?'AMARELO':'VERDE'} ${trabalha?'trabalho-border':''} ${iso===hojeStr?'hoje':''}" 
+                             onclick="abrirNota('${iso}')" ${iso===hojeStr?'id="hoje-scroll"':''}>
+                            <span class="dia-num">${d}</span>
+                            ${logs[iso]?`<div class="nota-txt">${logs[iso]}</div>`:''}
+                         </div>`;
+            }
+            card.innerHTML = html + `</div>`;
+            container.appendChild(card);
+        }
+    }
+
+    function abrirPainelEventos(mes) {
+        const ano = document.getElementById('anoSelect').value;
+        const turma = document.getElementById('turmaSelect').value;
+        const feriados = obterFeriados(ano);
+        const lista = document.getElementById('listaEventos');
+        const mesesNomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+        
+        lista.innerHTML = "";
+        document.getElementById('feriadoTitulo').innerText = mesesNomes[mes];
+
+        for(let f in feriados) {
+            const [fMes, fDia] = f.split('-').map(Number);
+            if(fMes === mes) {
+                const trabalha = checkTrabalha(new Date(ano, fMes, fDia), turma);
+                lista.innerHTML += `
+                    <div class="evento-item">
+                        <div class="evento-data">${String(fDia).padStart(2,'0')}</div>
+                        <div class="evento-info">
+                            <span class="evento-desc" style="font-weight:700; font-size:0.9em;">${feriados[f]}</span><br>
+                            <span class="tag-status ${trabalha?'tag-trabalho':'tag-folga'}">${trabalha?'Trabalho':'Folga'}</span>
+                        </div>
+                    </div>`;
+            }
+        }
+        if(!lista.innerHTML) lista.innerHTML = "<p style='text-align:center; opacity:0.5;'>Nenhum feriado este mês.</p>";
+        
+        document.getElementById('feriadosPanel').classList.add('active');
+        document.getElementById('feriadosOverlay').classList.add('active');
+    }
+
+    function closeFeriados() { document.getElementById('feriadosPanel').classList.remove('active'); document.getElementById('feriadosOverlay').classList.remove('active'); }
+    function toggleTheme() { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme_pro', document.body.classList.contains('dark-mode')?'dark':'light'); }
+    function salvarConfig() { localStorage.setItem('turma_pro', document.getElementById('turmaSelect').value); gerarCalendario(); atualizarRelogio(); }
+    function abrirNota(iso) { dataSelecionada = iso; document.getElementById('notaInput').value = JSON.parse(localStorage.getItem('logs_pro_v1')||'{}')[iso] || ""; document.getElementById('notaDataTit').innerText = iso.split('-').reverse().join('/'); document.getElementById('notaOverlay').classList.add('active'); }
+    function fecharNota() { document.getElementById('notaOverlay').classList.remove('active'); }
+    function salvarNota() { 
+        const logs = JSON.parse(localStorage.getItem('logs_pro_v1') || '{}'); 
+        const txt = document.getElementById('notaInput').value.trim().toUpperCase(); 
+        if(txt) logs[dataSelecionada] = txt; else delete logs[dataSelecionada]; 
+        localStorage.setItem('logs_pro_v1', JSON.stringify(logs)); 
+        fecharNota(); gerarCalendario(); 
+    }
+    function resetarDados() { if(confirm("Apagar todas as notas permanentemente?")) { localStorage.removeItem('logs_pro_v1'); gerarCalendario(); } }
+
+    window.onload = () => {
+        const savedTurma = localStorage.getItem('turma_pro');
+        if(savedTurma) document.getElementById('turmaSelect').value = savedTurma;
+        if(localStorage.getItem('theme_pro') === 'light') document.body.classList.remove('dark-mode');
+        
+        gerarCalendario(); 
+        atualizarRelogio();
+        setInterval(atualizarRelogio, 1000); 
+
+        setTimeout(() => { 
+            const hj = document.getElementById('hoje-scroll'); 
+            if(hj) hj.scrollIntoView({behavior:'smooth', block:'center'}); 
+        }, 600);
+    };
+</script>
+</body>
+</html>
